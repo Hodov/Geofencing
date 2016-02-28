@@ -50,6 +50,13 @@ limitations under the License.
             </intent-filter>
         </receiver>
 
+        <receiver android:name=".WiFiScanReceiver"
+            android:enabled="true">
+        <intent-filter>
+            <action android:name="android.net.wifi.SCAN_RESULTS" />
+        </intent-filter>
+    </receiver>
+
         <service android:name=".GeofenceTransitionsIntentService" />
     </application>
 </manifest>

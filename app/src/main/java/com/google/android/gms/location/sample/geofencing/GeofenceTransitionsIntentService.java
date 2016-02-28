@@ -20,10 +20,12 @@ import android.app.IntentService;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.net.wifi.ScanResult;
@@ -91,6 +93,21 @@ public class GeofenceTransitionsIntentService extends IntentService {
 
             if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER) {
                 enteredPlace();
+                /*
+                //Create WiFi scan receiver
+                WiFiScanReceiver wifiScan = new WiFiScanReceiver();
+                registerReceiver(wifiScan, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
+                */
+/*
+                ComponentName receiver = new ComponentName(this, WiFiScanReceiver.class);
+
+                PackageManager pm = this.getPackageManager();
+
+                pm.setComponentEnabledSetting(receiver,
+                        PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
+                        PackageManager.DONT_KILL_APP);
+*/
+
             }
 
             if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_EXIT) {
@@ -107,15 +124,17 @@ public class GeofenceTransitionsIntentService extends IntentService {
                     triggeringGeofences
             );
 
+            //сохраняем в настройках место, куда пришли
             savePlace("place", triggeringGeofences.get(0).getRequestId());
-            // Начинаем искать вай фай сети
+            // Начинаем искать вай фай сети, данные придут в вайфай ресивер
+            System.out.println("Сканим сети");
             scanWiFi();
 
             // Send notification and log the transition details.
             //sendNotification(geofenceTransitionDetails);
-
-
+            //отправим в слак местонахождение, потом удалить
             new SlackSender().sendText(geofenceTransitionDetails);
+
 
             Log.i(TAG, geofenceTransitionDetails);
         } else {

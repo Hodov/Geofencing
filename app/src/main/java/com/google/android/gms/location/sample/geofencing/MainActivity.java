@@ -126,9 +126,7 @@ public class MainActivity extends ActionBarActivity implements
         // Kick off the request to build GoogleApiClient.
         buildGoogleApiClient();
 
-        //Create receiver
-        WiFiScanReceiver wifiScan = new WiFiScanReceiver();
-        registerReceiver(wifiScan, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
+
     }
 
     /**
@@ -349,57 +347,6 @@ public class MainActivity extends ActionBarActivity implements
             mAddGeofencesButton.setEnabled(true);
             mRemoveGeofencesButton.setEnabled(false);
         }
-    }
-
-    /**
-     Ресивер
-     */
-
-    class WiFiScanReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            // Code to execute when SCAN_RESULTS_AVAILABLE_ACTION event occurs
-
-            WifiManager wifiManager=(WifiManager) context.getSystemService(Context.WIFI_SERVICE);
-
-            WifiInfo wifiInfo = wifiManager.getConnectionInfo();
-
-            List<ScanResult> infoList = wifiManager.getScanResults();
-            String listWiFi = "";
-
-            for (ScanResult a : infoList) {
-
-                if (this.enteredPlaceBool()) {
-                    if (Constants.BAY_AREA_WIFI.get(this.enteredPlace()).equals(a.SSID)) {
-                        new SlackSender().sendText("Найдена нужная сеть " + a.SSID);
-
-                    }
-
-                }
-
-                listWiFi = listWiFi + a.SSID + "\n";
-            }
-            //new SlackSender().sendText("Список сетей:\n" + listWiFi);
-
-            //if (ScanAsFastAsPossible) wifiManager.startScan(); // relaunch scan immediately
-            //else { /* Schedule the scan to be run later here */}
-        }
-
-
-        private boolean enteredPlaceBool() {
-            //SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
-            SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getApplication());
-            boolean defaultValue = true;
-            return sharedPref.getBoolean("entered", defaultValue);
-        }
-
-        private String enteredPlace() {
-            //SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
-            SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getApplication());
-            String defaultValue = "";
-            return sharedPref.getString("place", defaultValue);
-        }
-
     }
 
 }

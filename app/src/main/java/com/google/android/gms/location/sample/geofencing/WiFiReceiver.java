@@ -21,7 +21,7 @@ public class WiFiReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-
+        System.out.println("ВиФи ресивер");
         SlackSender sender = new SlackSender();
 
 
@@ -47,6 +47,9 @@ public class WiFiReceiver extends BroadcastReceiver {
             }
         }
     }
+
+
+
 
 }
 
