@@ -26,6 +26,7 @@ import android.net.wifi.ScanResult;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.View;
@@ -358,21 +359,47 @@ public class MainActivity extends ActionBarActivity implements
         @Override
         public void onReceive(Context context, Intent intent) {
             // Code to execute when SCAN_RESULTS_AVAILABLE_ACTION event occurs
-            System.out.println("Получили экшн");
+
             WifiManager wifiManager=(WifiManager) context.getSystemService(Context.WIFI_SERVICE);
 
             WifiInfo wifiInfo = wifiManager.getConnectionInfo();
 
             List<ScanResult> infoList = wifiManager.getScanResults();
             String listWiFi = "";
+
             for (ScanResult a : infoList) {
+
+                if (this.enteredPlaceBool()) {
+                    if (Constants.BAY_AREA_WIFI.get(this.enteredPlace()).equals(a.SSID)) {
+                        new SlackSender().sendText("Найдена нужная сеть " + a.SSID);
+
+                    }
+
+                }
+
                 listWiFi = listWiFi + a.SSID + "\n";
             }
-            new SlackSender().sendText("Список сетей:\n" + listWiFi);
+            //new SlackSender().sendText("Список сетей:\n" + listWiFi);
 
             //if (ScanAsFastAsPossible) wifiManager.startScan(); // relaunch scan immediately
             //else { /* Schedule the scan to be run later here */}
         }
+
+
+        private boolean enteredPlaceBool() {
+            //SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
+            SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getApplication());
+            boolean defaultValue = true;
+            return sharedPref.getBoolean("entered", defaultValue);
+        }
+
+        private String enteredPlace() {
+            //SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
+            SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getApplication());
+            String defaultValue = "";
+            return sharedPref.getString("place", defaultValue);
+        }
+
     }
 
 }

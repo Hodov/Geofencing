@@ -45,15 +45,15 @@ public final class Constants {
      */
     public static final long GEOFENCE_EXPIRATION_IN_MILLISECONDS =
             GEOFENCE_EXPIRATION_IN_HOURS * 60 * 60 * 1000;
-    public static final float GEOFENCE_RADIUS_IN_METERS = 100;
+    public static final float GEOFENCE_RADIUS_IN_METERS = 500;
 
     /**
-     * Map for storing information about airports in the San Francisco bay area.
+     * Map for storing information geofences
      */
     public static final HashMap<String, LatLng> BAY_AREA_LANDMARKS = new HashMap<String, LatLng>();
     static {
         // Work
-        BAY_AREA_LANDMARKS.put("Work", new LatLng(59.949655, 30.389269));
+        BAY_AREA_LANDMARKS.put("Office", new LatLng(59.949655, 30.389269));
 
         // Subway work
         BAY_AREA_LANDMARKS.put("Chernishevskaya", new LatLng(59.944551, 30.359845));
@@ -69,5 +69,15 @@ public final class Constants {
 
         // Krujki
         BAY_AREA_LANDMARKS.put("Krujki", new LatLng(59.838544, 30.348088));
+    }
+
+    public static final HashMap<String, String> BAY_AREA_WIFI = new HashMap<String, String>();
+    static {
+        // Work
+        BAY_AREA_WIFI.put("Office", "ABR");
+
+        // Subway work
+        BAY_AREA_WIFI.put("Home", "friends");
+
     }
 }

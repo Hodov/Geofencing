@@ -23,11 +23,13 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
+import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
 import android.text.TextUtils;
@@ -72,6 +74,7 @@ public class GeofenceTransitionsIntentService extends IntentService {
     @Override
     protected void onHandleIntent(Intent intent) {
         GeofencingEvent geofencingEvent = GeofencingEvent.fromIntent(intent);
+
         if (geofencingEvent.hasError()) {
             String errorMessage = GeofenceErrorMessages.getErrorString(this,
                     geofencingEvent.getErrorCode());
@@ -86,6 +89,14 @@ public class GeofenceTransitionsIntentService extends IntentService {
         if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER ||
                 geofenceTransition == Geofence.GEOFENCE_TRANSITION_EXIT) {
 
+            if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER) {
+                enteredPlace();
+            }
+
+            if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_EXIT) {
+                exitedPlace();
+            }
+
             // Get the geofences that were triggered. A single event can trigger multiple geofences.
             List<Geofence> triggeringGeofences = geofencingEvent.getTriggeringGeofences();
 
@@ -96,12 +107,16 @@ public class GeofenceTransitionsIntentService extends IntentService {
                     triggeringGeofences
             );
 
+            savePlace("place", triggeringGeofences.get(0).getRequestId());
             // Начинаем искать вай фай сети
             scanWiFi();
 
             // Send notification and log the transition details.
-            sendNotification(geofenceTransitionDetails);
+            //sendNotification(geofenceTransitionDetails);
+
+
             new SlackSender().sendText(geofenceTransitionDetails);
+
             Log.i(TAG, geofenceTransitionDetails);
         } else {
             // Log the error.
@@ -201,10 +216,34 @@ public class GeofenceTransitionsIntentService extends IntentService {
     private void scanWiFi() {
 
         // Launch  wifiscanner the first time here (it will call the broadcast receiver above)
-        System.out.println("Запускаем сканер");
         WifiManager wm = (WifiManager) getSystemService(Context.WIFI_SERVICE);
         Boolean a = wm.startScan();
-        System.out.println(a);
+
+    }
+
+    private void savePlace(String setting, String place) {
+
+        //SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putString(setting, place);
+        editor.commit();
+    }
+
+    private void enteredPlace() {
+
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putBoolean("entered", true);
+        editor.commit();
+    }
+
+    private void exitedPlace() {
+
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putBoolean("entered", false);
+        editor.commit();
     }
 
 }
