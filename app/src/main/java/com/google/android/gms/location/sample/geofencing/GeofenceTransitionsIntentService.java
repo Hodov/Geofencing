@@ -91,29 +91,6 @@ public class GeofenceTransitionsIntentService extends IntentService {
         if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER ||
                 geofenceTransition == Geofence.GEOFENCE_TRANSITION_EXIT) {
 
-            if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER) {
-                enteredPlace();
-                /*
-                //Create WiFi scan receiver
-                WiFiScanReceiver wifiScan = new WiFiScanReceiver();
-                registerReceiver(wifiScan, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
-                */
-/*
-                ComponentName receiver = new ComponentName(this, WiFiScanReceiver.class);
-
-                PackageManager pm = this.getPackageManager();
-
-                pm.setComponentEnabledSetting(receiver,
-                        PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
-                        PackageManager.DONT_KILL_APP);
-*/
-
-            }
-
-            if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_EXIT) {
-                exitedPlace();
-            }
-
             // Get the geofences that were triggered. A single event can trigger multiple geofences.
             List<Geofence> triggeringGeofences = geofencingEvent.getTriggeringGeofences();
 
@@ -124,16 +101,26 @@ public class GeofenceTransitionsIntentService extends IntentService {
                     triggeringGeofences
             );
 
+            if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER) {
+                enteredPlace();
+                activateScanReceiver();
+            }
+
+            if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_EXIT) {
+                exitedPlace();
+                new SlackSender().sendText("Покинул " + triggeringGeofences.get(0).getRequestId());
+            }
+
+            //одновременно может сработать несколько местоположений, это здесь не учтено
             //сохраняем в настройках место, куда пришли
             savePlace("place", triggeringGeofences.get(0).getRequestId());
             // Начинаем искать вай фай сети, данные придут в вайфай ресивер
-            System.out.println("Сканим сети");
             scanWiFi();
 
             // Send notification and log the transition details.
             //sendNotification(geofenceTransitionDetails);
             //отправим в слак местонахождение, потом удалить
-            new SlackSender().sendText(geofenceTransitionDetails);
+            //new SlackSender().sendText(geofenceTransitionDetails);
 
 
             Log.i(TAG, geofenceTransitionDetails);
@@ -263,6 +250,17 @@ public class GeofenceTransitionsIntentService extends IntentService {
         SharedPreferences.Editor editor = sharedPref.edit();
         editor.putBoolean("entered", false);
         editor.commit();
+    }
+
+    private void activateScanReceiver() {
+        System.out.println("Активируем скан ресивер");
+        ComponentName receiver = new ComponentName(this, WiFiScanReceiver.class);
+
+        PackageManager pm = this.getPackageManager();
+
+        pm.setComponentEnabledSetting(receiver,
+                PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
+                PackageManager.DONT_KILL_APP);
     }
 
 }

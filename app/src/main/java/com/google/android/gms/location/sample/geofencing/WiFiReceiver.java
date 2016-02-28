@@ -5,8 +5,10 @@ package com.google.android.gms.location.sample.geofencing;
  */
 
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.NetworkInfo;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiConfiguration;
@@ -21,7 +23,6 @@ public class WiFiReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        System.out.println("ВиФи ресивер");
         SlackSender sender = new SlackSender();
 
 
@@ -31,7 +32,6 @@ public class WiFiReceiver extends BroadcastReceiver {
                 // Do your work.
                 // e.g. To check the Network Name or other info:
                 WifiManager wifiManager=(WifiManager) context.getSystemService(Context.WIFI_SERVICE);
-
 
                 WifiInfo wifiInfo = wifiManager.getConnectionInfo();
                 List<ScanResult> infoList = wifiManager.getScanResults();
@@ -47,8 +47,6 @@ public class WiFiReceiver extends BroadcastReceiver {
             }
         }
     }
-
-
 
 
 }

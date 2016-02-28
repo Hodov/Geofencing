@@ -1,9 +1,11 @@
 package com.google.android.gms.location.sample.geofencing;
 
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
@@ -17,9 +19,7 @@ import java.util.List;
 public class WiFiScanReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
-        System.out.println("ВиФи скан ресивер");
         // Code to execute when SCAN_RESULTS_AVAILABLE_ACTION event occurs
-        System.out.println("Получили список вайфай сетей");
         WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
 
         WifiInfo wifiInfo = wifiManager.getConnectionInfo();
@@ -31,7 +31,8 @@ public class WiFiScanReceiver extends BroadcastReceiver {
             if (this.enteredPlaceBool(context)) {
                 if (Constants.BAY_AREA_WIFI.get(this.enteredPlace(context)).equals(a.SSID)) {
                     new SlackSender().sendText("Пришел " + this.enteredPlace(context));
-                    inBar(true,context);
+                    inBar(true, context);
+                    disableScanReceiver(context);
 
                 }
             }
@@ -63,6 +64,17 @@ public class WiFiScanReceiver extends BroadcastReceiver {
         SharedPreferences.Editor editor = sharedPref.edit();
         editor.putBoolean("inBar", bool);
         editor.commit();
+    }
+
+    private void disableScanReceiver(Context context) {
+        System.out.println("Деактивируем скан ресивер");
+        ComponentName receiver = new ComponentName(context, WiFiScanReceiver.class);
+
+        PackageManager pm = context.getPackageManager();
+
+        pm.setComponentEnabledSetting(receiver,
+                PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
+                PackageManager.DONT_KILL_APP);
     }
 
 }
