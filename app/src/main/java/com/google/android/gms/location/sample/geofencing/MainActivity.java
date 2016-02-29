@@ -31,8 +31,11 @@ import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Toast;
 
+import com.firebase.client.Firebase;
+import com.firebase.client.FirebaseError;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks;
@@ -97,10 +100,25 @@ public class MainActivity extends ActionBarActivity implements
     private Button mAddGeofencesButton;
     private Button mRemoveGeofencesButton;
 
+    private Button mLoginButton;
+    private EditText mLoginText;
+    private EditText mPasswordText;
+    private Firebase myFirebaseRef;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.main_activity);
+        setContentView(R.layout.main_activity2);
+
+        //Init Firebase
+        Firebase.setAndroidContext(this);
+        myFirebaseRef = new Firebase("https://barfly.firebaseio.com/");
+
+        //Get the login widgets
+        mLoginButton = (Button) findViewById(R.id.login_button);
+        mLoginText = (EditText) findViewById(R.id.login_label);
+        mPasswordText = (EditText) findViewById(R.id.password_label);
+
 
         // Get the UI widgets.
         mAddGeofencesButton = (Button) findViewById(R.id.add_geofences_button);
@@ -218,6 +236,11 @@ public class MainActivity extends ActionBarActivity implements
             // Catch exception generated if the app does not use ACCESS_FINE_LOCATION permission.
             logSecurityException(securityException);
         }
+    }
+
+    public void signUpUserHandler(View view) {
+        System.out.print("Отправляем");
+        signUpUser(myFirebaseRef, mLoginText.toString(), mPasswordText.toString());
     }
 
     /**
@@ -347,6 +370,19 @@ public class MainActivity extends ActionBarActivity implements
             mAddGeofencesButton.setEnabled(true);
             mRemoveGeofencesButton.setEnabled(false);
         }
+    }
+
+    private void signUpUser(Firebase myFirebaseRef, String login, String pass) {
+        myFirebaseRef.createUser(login, pass, new Firebase.ValueResultHandler<Map<String, Object>>() {
+            @Override
+            public void onSuccess(Map<String, Object> result) {
+                System.out.println("Successfully created user account with uid: " + result.get("uid"));
+            }
+            @Override
+            public void onError(FirebaseError firebaseError) {
+                // there was an error
+            }
+        });
     }
 
 }

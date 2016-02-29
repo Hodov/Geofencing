@@ -22,6 +22,8 @@
     <string name="add_geofences">Add geofences</string>
     <string name="remove_geofences">Remove geofences</string>
 
+    <string name="login">Login</string>
+
     <string name="geofences_added">Geofences added</string>
     <string name="geofences_removed">Geofences removed</string>
 
