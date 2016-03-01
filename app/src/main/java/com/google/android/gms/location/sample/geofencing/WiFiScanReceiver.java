@@ -11,6 +11,8 @@ import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.preference.PreferenceManager;
 
+import com.firebase.client.Firebase;
+
 import java.util.List;
 
 /**
@@ -64,6 +66,7 @@ public class WiFiScanReceiver extends BroadcastReceiver {
         SharedPreferences.Editor editor = sharedPref.edit();
         editor.putBoolean("inBar", bool);
         editor.commit();
+
     }
 
     private void disableScanReceiver(Context context) {

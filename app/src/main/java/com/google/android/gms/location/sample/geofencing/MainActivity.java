@@ -113,6 +113,7 @@ public class MainActivity extends ActionBarActivity implements
         //Init Firebase
         Firebase.setAndroidContext(this);
         myFirebaseRef = new Firebase("https://barfly.firebaseio.com/");
+        sendData();
 
         //Get the login widgets
         mLoginButton = (Button) findViewById(R.id.login_button);
@@ -238,10 +239,7 @@ public class MainActivity extends ActionBarActivity implements
         }
     }
 
-    public void signUpUserHandler(View view) {
-        System.out.print("Отправляем");
-        signUpUser(myFirebaseRef, mLoginText.toString(), mPasswordText.toString());
-    }
+
 
     /**
      * Removes geofences, which stops further notifications when the device enters or exits
@@ -372,17 +370,48 @@ public class MainActivity extends ActionBarActivity implements
         }
     }
 
+
+
+    public void signUpUserHandler(View view) {
+        System.out.println("Отправляем");
+        signUpUser(myFirebaseRef, mLoginText.getText().toString(), mPasswordText.getText().toString());
+    }
+
     private void signUpUser(Firebase myFirebaseRef, String login, String pass) {
+        System.out.println(login);
+        System.out.println(pass);
         myFirebaseRef.createUser(login, pass, new Firebase.ValueResultHandler<Map<String, Object>>() {
             @Override
             public void onSuccess(Map<String, Object> result) {
                 System.out.println("Successfully created user account with uid: " + result.get("uid"));
+
             }
             @Override
             public void onError(FirebaseError firebaseError) {
+                System.out.println("Unsuccessfully created user account: " + firebaseError);
                 // there was an error
             }
         });
+
+    }
+
+
+    private void sendData() {
+        System.out.println("Сенд дата");
+        Firebase ref = new Firebase("https://barfly.firebaseio.com/");
+        ref.child("hodov2").setValue("cool2");
+
+                /*, new Firebase.CompletionListener() {
+            @Override
+            public void onComplete(FirebaseError firebaseError, Firebase firebase) {
+                if (firebaseError != null) {
+                    System.out.println("Data could not be saved. " + firebaseError.getMessage());
+                } else {
+                    System.out.println("Data saved successfully.");
+                    System.out.println(firebaseError);
+                }
+            }
+        });*/
     }
 
 }

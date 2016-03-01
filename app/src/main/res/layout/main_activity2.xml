@@ -48,7 +48,6 @@
         android:id="@+id/login_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-
         android:onClick="signUpUserHandler"
         android:text="@string/login"
         android:layout_gravity="center_vertical"
