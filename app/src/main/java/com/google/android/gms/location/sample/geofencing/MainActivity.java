@@ -398,8 +398,10 @@ public class MainActivity extends ActionBarActivity implements
 
     private void sendData() {
         System.out.println("Сенд дата");
-        Firebase ref = new Firebase("https://barfly.firebaseio.com/");
-        ref.child("hodov2").setValue("cool2");
+        Firebase ref = new Firebase("https://barfly.firebaseio.com/users/hodov");
+        ref.child("enter").setValue(true);
+        ref.child("time").setValue(System.currentTimeMillis());
+
 
                 /*, new Firebase.CompletionListener() {
             @Override
