@@ -45,7 +45,8 @@ limitations under the License.
             </intent-filter>
         </activity>
 
-        <receiver android:name=".WiFiReceiver" >
+        <receiver android:name=".WiFiReceiver"
+            android:enabled="false">
             <intent-filter>
                 <action android:name="android.net.wifi.STATE_CHANGE" />
             </intent-filter>

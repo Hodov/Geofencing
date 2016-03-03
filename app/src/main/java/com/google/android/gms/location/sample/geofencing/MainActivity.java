@@ -18,10 +18,12 @@ package com.google.android.gms.location.sample.geofencing;
 
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
@@ -113,7 +115,7 @@ public class MainActivity extends ActionBarActivity implements
         //Init Firebase
         Firebase.setAndroidContext(this);
         myFirebaseRef = new Firebase("https://barfly.firebaseio.com/");
-        sendData();
+        //sendData();
 
         //Get the login widgets
         mLoginButton = (Button) findViewById(R.id.login_button);
@@ -380,10 +382,14 @@ public class MainActivity extends ActionBarActivity implements
     private void signUpUser(Firebase myFirebaseRef, String login, String pass) {
         System.out.println(login);
         System.out.println(pass);
+        final String userLogin = login;
         myFirebaseRef.createUser(login, pass, new Firebase.ValueResultHandler<Map<String, Object>>() {
             @Override
             public void onSuccess(Map<String, Object> result) {
                 System.out.println("Successfully created user account with uid: " + result.get("uid"));
+
+                Firebase ref = new Firebase("https://barfly.firebaseio.com/users/"+userLogin);
+                ref.child("uid").setValue(result.get("uid"));
 
             }
             @Override
@@ -415,5 +421,6 @@ public class MainActivity extends ActionBarActivity implements
             }
         });*/
     }
+
 
 }

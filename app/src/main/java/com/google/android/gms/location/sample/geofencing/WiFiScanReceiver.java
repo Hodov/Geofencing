@@ -13,7 +13,10 @@ import android.preference.PreferenceManager;
 
 import com.firebase.client.Firebase;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Created by Andrey on 28.02.2016.
@@ -34,6 +37,7 @@ public class WiFiScanReceiver extends BroadcastReceiver {
                 if (Constants.BAY_AREA_WIFI.get(this.enteredPlace(context)).equals(a.SSID)) {
                     new SlackSender().sendText("Пришел " + this.enteredPlace(context));
                     inBar(true, context);
+                    sendData(this.enteredPlace(context));
                     disableScanReceiver(context);
 
                 }
@@ -78,6 +82,17 @@ public class WiFiScanReceiver extends BroadcastReceiver {
         pm.setComponentEnabledSetting(receiver,
                 PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
                 PackageManager.DONT_KILL_APP);
+    }
+
+    private void sendData(String place) {
+        Firebase ref = new Firebase("https://barfly.firebaseio.com/users/hodov/bars/" + place);
+        ref.child("entered").setValue("true");
+        String uuid = UUID.randomUUID().toString();
+        Firebase ref2 = new Firebase("https://barfly.firebaseio.com/users/hodov/bars/" + place + "/enters/"+uuid);
+        String date = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(new Date());
+//        ref2.child("time").setValue(System.currentTimeMillis());
+        ref2.child("time").setValue(date);
+
     }
 
 }

@@ -37,8 +37,16 @@ import android.support.v4.app.TaskStackBuilder;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.fasterxml.jackson.databind.util.JSONPObject;
+import com.firebase.client.DataSnapshot;
+import com.firebase.client.Firebase;
+import com.firebase.client.FirebaseError;
+import com.firebase.client.ValueEventListener;
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingEvent;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -109,6 +117,7 @@ public class GeofenceTransitionsIntentService extends IntentService {
             if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_EXIT) {
                 exitedPlace();
                 new SlackSender().sendText("Покинул " + triggeringGeofences.get(0).getRequestId());
+                retrieveData();
             }
 
             //одновременно может сработать несколько местоположений, это здесь не учтено
@@ -261,6 +270,40 @@ public class GeofenceTransitionsIntentService extends IntentService {
         pm.setComponentEnabledSetting(receiver,
                 PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
                 PackageManager.DONT_KILL_APP);
+    }
+
+
+    private void retrieveData() {
+        // Get a reference to our posts
+        Firebase ref = new Firebase("https://barfly.firebaseio.com/users/hodov/bars/");
+        // Attach an listener to read the data at our posts reference
+        ref.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot snapshot) {
+                JSONObject dataJSON = new JSONObject();
+
+                try {
+                    dataJSON = new JSONObject(snapshot.getValue().toString());
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+                String entered = "";
+                try {
+                    entered = dataJSON.getJSONObject("Office").getString("entered");
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+                new SlackSender().sendText(entered);
+
+
+            }
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
+                System.out.println("The read failed: " + firebaseError.getMessage());
+            }
+        });
     }
 
 }
