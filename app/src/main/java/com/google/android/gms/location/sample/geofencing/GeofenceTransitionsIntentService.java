@@ -112,12 +112,13 @@ public class GeofenceTransitionsIntentService extends IntentService {
             if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER) {
                 enteredPlace();
                 activateScanReceiver();
+                deleteFromBar();
             }
 
             if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_EXIT) {
                 exitedPlace();
                 new SlackSender().sendText("Покинул " + triggeringGeofences.get(0).getRequestId());
-                retrieveData();
+                //deleteFromBar();
             }
 
             //одновременно может сработать несколько местоположений, это здесь не учтено
@@ -273,7 +274,7 @@ public class GeofenceTransitionsIntentService extends IntentService {
     }
 
 
-    private void retrieveData() {
+    private void deleteFromBar() {
         // Get a reference to our posts
         Firebase ref = new Firebase("https://barfly.firebaseio.com/users/hodov/bars/");
         // Attach an listener to read the data at our posts reference
@@ -282,23 +283,25 @@ public class GeofenceTransitionsIntentService extends IntentService {
             public void onDataChange(DataSnapshot snapshot) {
                 JSONObject dataJSON = new JSONObject();
 
+
                 try {
-                    dataJSON = new JSONObject(snapshot.getValue().toString());
+                    String s = snapshot.getValue().toString();
+                    System.out.println("Строка " + s);
+                    dataJSON = new JSONObject(s);
                 } catch (JSONException e) {
-                    e.printStackTrace();
+                    System.out.println("Первый трай " + e);
                 }
 
                 String entered = "";
                 try {
-                    entered = dataJSON.getJSONObject("Office").getString("entered");
+                    entered = dataJSON.getJSONObject("Home").getString("entered");
+
                 } catch (JSONException e) {
-                    e.printStackTrace();
+                  System.out.println("Второй трай " + e);
                 }
 
-                new SlackSender().sendText(entered);
-
-
             }
+
             @Override
             public void onCancelled(FirebaseError firebaseError) {
                 System.out.println("The read failed: " + firebaseError.getMessage());

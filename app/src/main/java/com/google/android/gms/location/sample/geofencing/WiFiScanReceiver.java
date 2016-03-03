@@ -89,7 +89,7 @@ public class WiFiScanReceiver extends BroadcastReceiver {
         ref.child("entered").setValue("true");
         String uuid = UUID.randomUUID().toString();
         Firebase ref2 = new Firebase("https://barfly.firebaseio.com/users/hodov/bars/" + place + "/enters/"+uuid);
-        String date = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(new Date());
+        String date = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss").format(new Date());
 //        ref2.child("time").setValue(System.currentTimeMillis());
         ref2.child("time").setValue(date);
 
