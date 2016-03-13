@@ -29,6 +29,7 @@ import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.View;
@@ -36,6 +37,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.firebase.client.AuthData;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.google.android.gms.common.ConnectionResult;
@@ -105,7 +107,8 @@ public class MainActivity extends ActionBarActivity implements
     private Button mLoginButton;
     private EditText mLoginText;
     private EditText mPasswordText;
-    private Firebase myFirebaseRef;
+    //private Firebase myFirebaseRef;
+    private AuthData mAuthData;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -113,8 +116,22 @@ public class MainActivity extends ActionBarActivity implements
         setContentView(R.layout.main_activity2);
 
         //Init Firebase
-        Firebase.setAndroidContext(this);
-        myFirebaseRef = new Firebase("https://barfly.firebaseio.com/");
+//        Firebase.setAndroidContext(this);
+//        myFirebaseRef = new Firebase("https://barfly.firebaseio.com/");
+        MySingleton s = (MySingleton)this.getApplication();
+        s.myFirebaseRef.addAuthStateListener(new Firebase.AuthStateListener() {
+            @Override
+            public void onAuthStateChanged(AuthData authData) {
+                mAuthData = authData;
+                if (authData != null) {
+
+                    // user is logged in
+                } else {
+                    // user is not logged in
+                }
+            }
+        });
+
         //sendData();
 
         //Get the login widgets
@@ -146,6 +163,28 @@ public class MainActivity extends ActionBarActivity implements
 
         // Kick off the request to build GoogleApiClient.
         buildGoogleApiClient();
+
+        if (userLogIn()) {
+            System.out.println("Юзер залогинен");
+            System.out.println(mAuthData);
+            // Begin the transaction
+            FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+            // Replace the contents of the container with the new fragment
+            ft.replace(R.id.placeholder, new LoginFragment());
+            // or ft.add(R.id.your_placeholder, new FooFragment());
+            // Complete the changes added above
+            ft.commit();
+        } else
+        {
+            System.out.println("Юзер не залогинен");
+            // Begin the transaction
+            FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+            // Replace the contents of the container with the new fragment
+            ft.replace(R.id.placeholder, new LoginFragment());
+            // or ft.add(R.id.your_placeholder, new FooFragment());
+            // Complete the changes added above
+            ft.commit();
+        }
 
 
     }
@@ -376,7 +415,8 @@ public class MainActivity extends ActionBarActivity implements
 
     public void signUpUserHandler(View view) {
         System.out.println("Отправляем");
-        signUpUser(myFirebaseRef, mLoginText.getText().toString(), mPasswordText.getText().toString());
+        MySingleton s = (MySingleton)this.getApplication();
+        signUpUser(s.myFirebaseRef, mLoginText.getText().toString(), mPasswordText.getText().toString());
     }
 
     private void signUpUser(Firebase myFirebaseRef, String login, String pass) {
@@ -388,10 +428,11 @@ public class MainActivity extends ActionBarActivity implements
             public void onSuccess(Map<String, Object> result) {
                 System.out.println("Successfully created user account with uid: " + result.get("uid"));
 
-                Firebase ref = new Firebase("https://barfly.firebaseio.com/users/"+userLogin);
+                Firebase ref = new Firebase("https://barfly.firebaseio.com/users/" + userLogin);
                 ref.child("uid").setValue(result.get("uid"));
 
             }
+
             @Override
             public void onError(FirebaseError firebaseError) {
                 System.out.println("Unsuccessfully created user account: " + firebaseError);
@@ -400,7 +441,6 @@ public class MainActivity extends ActionBarActivity implements
         });
 
     }
-
 
     private void sendData() {
         System.out.println("Сенд дата");
@@ -421,6 +461,17 @@ public class MainActivity extends ActionBarActivity implements
             }
         });*/
     }
+
+    private Boolean userLogIn() {
+        if (mAuthData != null) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+
+
 
 
 }
